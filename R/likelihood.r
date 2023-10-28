@@ -33,8 +33,10 @@
 ll_pmwg <- function(x, data, sample=FALSE) {
   names(x) <- par_names
   x <- transform_pars(x, fwd=FALSE)
-  d <- ((x["w"] * (data$price_n - a[1])^x["r"]) +
-        ((1 - x["w"]) * (data$rating_n - a[2])^x["r"]))^(1/x["r"])
+  d <- distance(c(x["w"], 1 - x["w"]),
+                cbind(data$price_n, data$rating_n),
+                c(0, 0),
+                x["r"])
   resp_p <- pnorm(x["delta"] + x["s"] * d)
   # Make sure not too close to 1
   resp_p <- pmin(resp_p, 1 - 1e-10)
