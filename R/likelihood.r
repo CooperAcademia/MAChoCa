@@ -1,13 +1,10 @@
-#' Calculate likelihood of x given the data and return it
+#' Calculate likelihood of x given single option data
 #'
 #' This function transforms parameters from the real number line to
-#' the appropriate regions using `transform_pars`. The using a variation
+#' the appropriate regions using `transform_pars`. Then using a variation
 #' of the generalised context model for categorisation it calculates
 #' the likelihood of the parameter vector x at leading to the accept/reject
-#' responses to the prices and ratings in the data.
-#'
-#' If `sample = TRUE` it will instead replace the accept column of the data with
-#' values sampled from the model using the provided parameter values x
+#' responses to the prices and ratings in the single-option data.
 #'
 #' The `x` parameter vector is expected to be a named vector containing values
 #' for `w` weight on the price attribute, `r` form of the distance metric,
@@ -24,13 +21,31 @@
 #' @param x A named vector of parameters. Expects certain values as in
 #'   description
 #' @param data A data.frame compatible object with specific rows as described.
-#' @param sample A boolean which specifies whether to return the likelihood, or
-#'   sample new responses.
 #'
-#' @return A single value (log-likelihood) or a copy of `data` with new
-#'   responses
+#' @return A single value (log-likelihood)
 #' @export
-ll_pmwg <- function(x, data, sample=FALSE) {
+ll_single <- function(x, data) {
+  resp_p <- rp_single(x, data)
+
+  ll <- sum(log(resp_p[data$accept]), log((1 - resp_p)[!data$accept]))
+  if (is.nan(ll)) {
+    return(-Inf)
+  }
+  ll
+}
+
+
+#' Calculate response probabilities for single option data
+#'
+#' Used for both calculating likelihoods or sampling from a parameter estimate
+#' This function calculates the probabilities of responses to a dataset
+#' based on the provided parameters (in the `x` vector).
+#' @param x A named vector of parameters. Expects certain values as in
+#'   description
+#' @param data A data.frame compatible object with specific rows as described.
+#' @importFrom stats pnorm
+#' @export
+rp_single <- function(x, data) {
   names(x) <- par_names
   x <- transform_pars(x, fwd=FALSE)
   d <- distance(c(x["w"], 1 - x["w"]),
@@ -42,32 +57,9 @@ ll_pmwg <- function(x, data, sample=FALSE) {
   resp_p <- pmin(resp_p, 1 - 1e-10)
   # Make sure not too close to 0
   resp_p <- pmax(resp_p, 1e-10)
-
-  if(!sample) {
-    ll <- sum(log(resp_p[data$accept]), log((1 - resp_p)[!data$accept]))
-    if (is.nan(ll)) {
-      return(-Inf)
-    }
-    return(ll)
-  } else {
-    data$resp_p <- resp_p
-    data$accept <- rbinom(n=nrow(data), size=1, prob=resp_p) %>% as.logical()
-    return(data)
-  }
+  resp_p
 }
 
-#' Likelihood for single option, but minimises.
-#'
-#' See description for ll_pmwg. This is a thin wrapper that negates the output
-#' for use with the R built-in optim.
-#' 
-#' @inheritParams ll_pmwg
-#'
-#' @return negated likelihood
-#' @export
-ll_optim <- function(x, data) {
-  return -ll_pmwg(x, data, sample=FALSE)
-}
 
 #' Transform the parameter vector for use in pmwg
 #'
@@ -82,6 +74,7 @@ ll_optim <- function(x, data) {
 #' @param fwd Move certain parameter to real number line or back
 #'
 #' @return transformed parameter vector x
+#' @importFrom stats qnorm pnorm
 #' @export
 transform_pars <- function(x, fwd=TRUE) {
   if(fwd) {
