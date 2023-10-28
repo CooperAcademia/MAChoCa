@@ -1,10 +1,11 @@
-Package: MAChoCa
-Title: What the Package Does (One Line, Title Case)
+Package: machoca
+Title: Multi-Attribute Choice modelling using Categorisation
 Version: 0.0.0.9002
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+    person("Gavin", "Cooper", , "gavin@gavincooper.net", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-7186-5293"))
+Description: This package contains functions and objects used to assist with the modelling of multi-attribute
+    preference data using a novel application of the generalised context model.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
