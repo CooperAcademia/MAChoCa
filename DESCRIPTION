@@ -1,6 +1,6 @@
 Package: machoca
 Title: Multi-Attribute Choice modelling using Categorisation
-Version: 0.0.0.9004
+Version: 0.0.1
 Authors@R: 
     person("Gavin", "Cooper", , "gavin@gavincooper.net", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7186-5293"))

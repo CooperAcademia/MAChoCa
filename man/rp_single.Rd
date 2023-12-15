@@ -2,15 +2,21 @@
 % Please edit documentation in R/likelihood.r
 \name{rp_single}
 \alias{rp_single}
-\title{Calculate response probabilities for single option data}
+\title{Calculate response probabilities for single option double attribute data}
 \usage{
-rp_single(x, data)
+rp_single(x, data, attr1 = "price_n", attr2 = "rating_n")
 }
 \arguments{
 \item{x}{A named vector of parameters. Expects certain values as in
 description}
 
 \item{data}{A data.frame compatible object with specific rows as described.}
+
+\item{attr1}{The name of the column containing normalised values for the
+first attribute (which has the weight value applied to it)}
+
+\item{attr2}{The name of the column containing normalised values for the
+second attribute(which has the (1 - weight) values applied to it}
 }
 \description{
 Used for both calculating likelihoods or sampling from a parameter estimate

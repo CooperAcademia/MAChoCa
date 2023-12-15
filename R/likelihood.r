@@ -21,11 +21,12 @@
 #' @param x A named vector of parameters. Expects certain values as in
 #'   description
 #' @param data A data.frame compatible object with specific rows as described.
+#' @param ... Other parameters passed to `rp_single`
 #'
 #' @return A single value (log-likelihood)
 #' @export
-ll_single <- function(x, data) {
-  resp_p <- rp_single(x, data)
+ll_single <- function(x, data, ...) {
+  resp_p <- rp_single(x, data, ...)
 
   ll <- sum(log(resp_p[data$accept]), log((1 - resp_p)[!data$accept]))
   if (is.nan(ll)) {
@@ -35,7 +36,7 @@ ll_single <- function(x, data) {
 }
 
 
-#' Calculate response probabilities for single option data
+#' Calculate response probabilities for single option double attribute data
 #'
 #' Used for both calculating likelihoods or sampling from a parameter estimate
 #' This function calculates the probabilities of responses to a dataset
@@ -43,13 +44,16 @@ ll_single <- function(x, data) {
 #' @param x A named vector of parameters. Expects certain values as in
 #'   description
 #' @param data A data.frame compatible object with specific rows as described.
+#' @param attr1 The name of the column containing normalised values for the
+#'   first attribute (which has the weight value applied to it)
+#' @param attr2 The name of the column containing normalised values for the
+#'   second attribute(which has the (1 - weight) values applied to it
 #' @importFrom stats pnorm
 #' @export
-rp_single <- function(x, data) {
-  names(x) <- par_names
+rp_single <- function(x, data, attr1 = "price_n", attr2 = "rating_n") {
   x <- transform_pars(x, fwd=FALSE)
   d <- distance(c(x["w"], 1 - x["w"]),
-                cbind(data$price_n, data$rating_n),
+                cbind(data[attr1], data[attr2]),
                 c(0, 0),
                 x["r"])
   resp_p <- pnorm(x["delta"] + x["s"] * d)
