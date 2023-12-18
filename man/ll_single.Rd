@@ -5,6 +5,8 @@
 \title{Calculate likelihood of x given single option data}
 \usage{
 ll_single(x, data, ...)
+
+ll_single(x, data, ...)
 }
 \arguments{
 \item{x}{A named vector of parameters. Expects certain values as in
@@ -16,6 +18,8 @@ description}
 }
 \value{
 A single value (log-likelihood)
+
+A single value (log-likelihood)
 }
 \description{
 This function transforms parameters from the real number line to
@@ -23,6 +27,12 @@ the appropriate regions using \code{transform_pars}. Then using a variation
 of the generalised context model for categorisation it calculates
 the likelihood of the parameter vector x at leading to the accept/reject
 responses to the prices and ratings in the single-option data.
+
+This function transforms parameters from the real number line to
+the appropriate regions using \code{transform_pars_dbl}. It then uses a
+sensitivity adjusted Luce Choice Axiom rule and distances from the
+exemplar as from the single option models to calculate the likelihood
+of the parameter vector x given the data.
 }
 \details{
 The \code{x} parameter vector is expected to be a named vector containing values
@@ -36,4 +46,16 @@ normalised to 0-1 and reversed so that 0 is the "worst" ie highest price and
 1 is the best price. It should also have a rating_n column with ratings
 normalised to 0-1 (worst-best) and finally an \code{accept} column with T/F for
 whether the option was accepted.
+
+The \code{x} parameter vector is expected to be a named vector containing values
+for \code{w} weight on the price attribute, \code{r} form of the distance metric and
+\code{gamma} sensitivity to differences in attribute space.
+
+The data object is assumed to be a data.frame compatible object with at
+least five columns, a \code{left_price} and a \code{right_price} column with values
+for the price attribute normalised to 0-1 and reversed so that 0 is the
+"worst" ie highest price and 1 is the best price.
+It should also have a \code{left_memory} and a \code{right_memory} column with memory
+values normalised to 0-1 (worst-best) and finally a \code{response} column with
+T/F for whether the option selected was on the left.
 }

@@ -2,10 +2,13 @@
 
 export(distance)
 export(ll_single)
+export(rp_double)
 export(rp_single)
+export(sample_double)
 export(sample_single)
 export(saveRDS_)
 export(transform_pars)
+export(transform_pars_dbl)
 importFrom(stats,pnorm)
 importFrom(stats,qnorm)
 importFrom(stats,rbinom)
