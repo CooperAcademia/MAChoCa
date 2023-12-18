@@ -62,8 +62,8 @@ ll_single <- function(x, data, ...) {
 #'
 #' @return A single value (log-likelihood)
 #' @export
-ll_single <- function(x, data, ...) {
-  resp_p <- rp_single(x, data, ...)
+ll_double <- function(x, data, ...) {
+  resp_p <- rp_double(x, data, ...)
 
   ll <- sum(log(resp_p[data$response]), log((1 - resp_p)[!data$response]))
   if (is.nan(ll)) {
@@ -109,10 +109,16 @@ rp_single <- function(x, data, attr1 = "price_n", attr2 = "rating_n") {
 #' @param x A named vector of parameters. Expects certain values as in
 #'   description
 #' @param data A data.frame compatible object with specific rows as described.
-#' @param attr1 The name of the column containing normalised values for the
-#'   first attribute (which has the weight value applied to it)
-#' @param attr2 The name of the column containing normalised values for the
-#'   second attribute(which has the (1 - weight) values applied to it
+#' @param loc1_attr1 The name of the column containing normalised values for the
+#'   first attribute (which has the weight value applied to it) in location 1
+#' @param loc1_attr2 The name of the column containing normalised values for the
+#'   second attribute(which has the (1 - weight) values applied to it in
+#'   location 1
+#' @param loc2_attr1 The name of the column containing normalised values for the
+#'   first attribute (which has the weight value applied to it) in location 2
+#' @param loc2_attr2 The name of the column containing normalised values for the
+#'   second attribute(which has the (1 - weight) values applied to it in
+#'   location 2
 #' @importFrom stats pnorm
 #' @export
 rp_double <- function(x, data,

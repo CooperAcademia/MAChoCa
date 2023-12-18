@@ -19,11 +19,19 @@ description}
 
 \item{data}{A data.frame compatible object with specific rows as described.}
 
-\item{attr1}{The name of the column containing normalised values for the
-first attribute (which has the weight value applied to it)}
+\item{loc1_attr1}{The name of the column containing normalised values for the
+first attribute (which has the weight value applied to it) in location 1}
 
-\item{attr2}{The name of the column containing normalised values for the
-second attribute(which has the (1 - weight) values applied to it}
+\item{loc1_attr2}{The name of the column containing normalised values for the
+second attribute(which has the (1 - weight) values applied to it in
+location 1}
+
+\item{loc2_attr1}{The name of the column containing normalised values for the
+first attribute (which has the weight value applied to it) in location 2}
+
+\item{loc2_attr2}{The name of the column containing normalised values for the
+second attribute(which has the (1 - weight) values applied to it in
+location 2}
 }
 \description{
 Used for both calculating likelihoods or sampling from a parameter estimate
