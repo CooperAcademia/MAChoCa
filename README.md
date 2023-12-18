@@ -4,14 +4,14 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of MAChoCa is to ...
+The goal of MAChoCa is to provide reuseable likelihood function to run multi-attribute choce models based on categorical models.
 
 ## Installation
 
 You can install the development version of MAChoCa like so:
 
 ``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+devtools::install_github("CooperAcademia/MAChoCa")
 ```
 
 ## Example
