@@ -164,10 +164,13 @@ transform_pars <- function(x, fwd=TRUE) {
     x["w"] <- qnorm(x["w"])
   }  else {
     x[c("r","s")] <- exp(x[c("r","s")])
+    x["r"] <- max(x["r"], 1e-10)  # Make sure not 0
+    x["s"] <- max(x["s"], 1e-10)  # Make sure not 0
     x["w"] <- pnorm(x["w"])
   }
   x
 }
+
 #' Transform the parameter vector (dbl option, dbl attr) for use in pmwg
 #'
 #' See also the description for ll_double. This is a helper function that
@@ -189,6 +192,8 @@ transform_pars_dbl <- function(x, fwd=TRUE) {
     x["w"] <- qnorm(x["w"])
   }  else {
     x[c("r","gamma")] <- exp(x[c("r","gamma")])
+    x["r"] <- max(x["r"], 1e-10)  # Make sure not 0
+    x["gamma"] <- max(x["gamma"], 1e-10)  # Make sure not 0
     x["w"] <- pnorm(x["w"])
   }
   x
