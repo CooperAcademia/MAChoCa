@@ -3,6 +3,7 @@
 export(distance)
 export(ll_double)
 export(ll_single)
+export(normalise)
 export(rp_double)
 export(rp_single)
 export(sample_double)
