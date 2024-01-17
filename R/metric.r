@@ -15,7 +15,7 @@ distance <- function(w, attrs, anchor, r) {
   stopifnot(length(w) == ncol(attrs),
             length(w) == length(anchor),
             r > 0,
-            sum(w) == 1)
+            isTRUE(all.equal(sum(w), 1)))
   
   attr_dist <- sapply(seq_along(w), FUN = function(i) {
            w[i] * abs(attrs[,i] - anchor[i])^r
