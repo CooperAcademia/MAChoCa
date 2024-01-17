@@ -263,12 +263,13 @@ transform_pars_cut <- function(x, fwd=TRUE) {
   if(fwd) {
     x[c("r","gamma")] <- log(x[c("r","gamma")])
     x[cuts] <- qnorm(x[cuts])
-  }  else {
-    x[c("r","gamma")] <- exp(x[c("r","gamma")])
-    x["r"] <- max(x["r"], 1e-10)  # Make sure not 0
-    x["gamma"] <- max(x["gamma"], 1e-10)  # Make sure not 0
-    x[cuts] <- pnorm(x[cuts])
+    return(x)
   }
+  x[c("r","gamma")] <- exp(x[c("r","gamma")])
+  x["r"] <- max(x["r"], 1e-10)  # Make sure not 0
+  x["gamma"] <- max(x["gamma"], 1e-10)  # Make sure not 0
+  x[cuts] <- pnorm(x[cuts])
+
 	cuts <- x[grep("^c", names(x))]
 
 	weights <- c()
