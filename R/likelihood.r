@@ -35,7 +35,7 @@ ll_single <- function(x, data, ...) {
   ll
 }
 
-#' Calculate likelihood of x given double option data (2 attrs)
+#' Calculate likelihood of x given double option data (N attrs)
 #'
 #' This function transforms parameters from the real number line to
 #' the appropriate regions using `transform_pars_dbl`. It then uses a
@@ -43,27 +43,22 @@ ll_single <- function(x, data, ...) {
 #' exemplar as from the single option models to calculate the likelihood
 #' of the parameter vector x given the data.
 #'
-#' The `x` parameter vector is expected to be a named vector containing values
-#' for `w` weight on the price attribute, `r` form of the distance metric and
-#' `gamma` sensitivity to differences in attribute space.
-#'
 #' The data object is assumed to be a data.frame compatible object with at
-#' least five columns, a `left_price` and a `right_price` column with values
-#' for the price attribute normalised to 0-1 and reversed so that 0 is the
-#' "worst" ie highest price and 1 is the best price.
-#' It should also have a `left_memory` and a `right_memory` column with memory
-#' values normalised to 0-1 (worst-best) and finally a `response` column with
-#' T/F for whether the option selected was on the left.
+#' least columns for each attribute used in the `rp_func` and additionally
+#' have a `response` column with T/F for whether the option selected was on the
+#' left.
 #'
 #' @param x A named vector of parameters. Expects certain values as in
-#'   description
+#'   the description for the `rp_func`
 #' @param data A data.frame compatible object with specific rows as described.
-#' @param ... Other parameters passed to `rp_single`
+#' @param rp_func A function for calculating response probabilities for choosing
+#'   the left presented item.
+#' @param ... Other parameters passed to `rp_func`
 #'
 #' @return A single value (log-likelihood)
 #' @export
-ll_double <- function(x, data, ...) {
-  resp_p <- rp_double(x, data, ...)
+ll_double <- function(x, data, rp_func = rp_double, ...) {
+  resp_p <- rp_func(x, data, ...)
 
   ll <- sum(log(resp_p[data$response]), log((1 - resp_p)[!data$response]))
   if (is.nan(ll)) {
@@ -71,6 +66,7 @@ ll_double <- function(x, data, ...) {
   }
   ll
 }
+
 
 #' Calculate response probabilities for single option double attribute data
 #'
@@ -100,12 +96,16 @@ rp_single <- function(x, data, attr1 = "price_n", attr2 = "rating_n") {
   resp_p
 }
 
-
 #' Calculate response probabilities for double option double attribute data
 #'
 #' Used for both calculating likelihoods or sampling from a parameter estimate
 #' This function calculates the probabilities of responses to a dataset
 #' based on the provided parameters (in the `x` vector).
+#'
+#' The `x` parameter vector is expected to be a named vector containing values
+#' for `w` weight on the price attribute, `r` form of the distance metric and
+#' `gamma` sensitivity to differences in attribute space.
+#'
 #' @param x A named vector of parameters. Expects certain values as in
 #'   description
 #' @param data A data.frame compatible object with specific rows as described.
@@ -143,6 +143,50 @@ rp_double <- function(x, data,
 }
 
 
+#' Calculate response probabilities for 2xN using the cut_remain method
+#'
+#' Used for both calculating likelihoods or sampling from a parameter estimate
+#' This function calculates the probabilities of responses to a dataset
+#' based on the provided parameters (in the `x` vector).
+#'
+#' The `x` parameter vector is expected to be a named vector containing values
+#' for `\eqn{c_1..c_{N-1}}` where each \eqn{c_i} corresponds to the cut point
+#' for each attribute \eqn{1..(N-1)}. The cut points are transformed to
+#' attribute weights by cutting the remaining proportion of the 0-1 scale for
+#' each new cut point, and the last weight being the remaining proportion.
+#' The parameter vector `x` also contains `r` form of the distance metric and
+#' `gamma` sensitivity to differences in attribute space.
+#'
+#' @param x A named vector of parameters. Expects certain values as in
+#'   description
+#' @param data A data.frame compatible object with specific rows as described.
+#' @param loc1_attrs The column names containing normalised values for the
+#'   attributes (which has the weight value applied to it) in location 1
+#' @param loc2_attrs The name of the column containing normalised values for the
+#'   attributes (which has the weight value applied to it) in location 2
+#' @importFrom stats pnorm
+#' @export
+rp_cut <- function(x, data, loc1_attrs = c("left_price", "left_memory"),
+                      loc2_attrs = c("right_price", "right_memory")) {
+  x <- transform_pars_cut(x, fwd=FALSE)
+  da <- distance(x[grep("^w", names(x))],
+                 data.matrix(data[loc1_attrs]),
+                 rep(0, 5),
+                 x["r"])
+  db <- distance(x[grep("^w", names(x))],
+                 data.matrix(data[loc2_attrs]),
+                 rep(0, 5),
+                 x["r"])
+  resp_p <- da^x["gamma"] / (da^x["gamma"] + db^x["gamma"])
+#  resp_p <- pnorm(x["delta"] + x["s"] * d)
+  # Make sure not too close to 1
+  resp_p <- pmin(resp_p, 1 - 1e-10)
+  # Make sure not too close to 0
+  resp_p <- pmax(resp_p, 1e-10)
+  resp_p
+}
+
+
 #' Transform the parameter vector for use in pmwg
 #'
 #' See also the description for ll_single. This is a helper function that
@@ -151,7 +195,7 @@ rp_double <- function(x, data,
 #' that values are between 0 and 1.
 #'
 #' These operation are reversed when `fwd=TRUE`
-#' 
+#'
 #' @param x The named vector of parameter estimates
 #' @param fwd Move certain parameter to real number line or back
 #'
@@ -179,7 +223,7 @@ transform_pars <- function(x, fwd=TRUE) {
 #' that values are between 0 and 1.
 #'
 #' These operation are reversed when `fwd=TRUE`
-#' 
+#'
 #' @param x The named vector of parameter estimates
 #' @param fwd Move certain parameter to real number line or back
 #'
@@ -197,4 +241,44 @@ transform_pars_dbl <- function(x, fwd=TRUE) {
     x["w"] <- pnorm(x["w"])
   }
   x
+}
+
+#' Transform the parameter vector (2 x N) cut method for use in pmwg
+#'
+#' See also the description for rp_cut This is a helper function that
+#' transforms the parameters. To transform for pmwg the `r` and `gamma` values
+#' are exponentiated in order to move to positive only and cut points `c1`..`cn`
+#' are pnormed so that values are between 0 and 1.
+#'
+#' These operation are reversed when `fwd=TRUE`
+#'
+#' @param x The named vector of parameter estimates
+#' @param fwd Move certain parameter to real number line or back
+#'
+#' @return transformed parameter vector x
+#' @importFrom stats qnorm pnorm
+#' @export
+transform_pars_cut <- function(x, fwd=TRUE) {
+  cuts <- grep("^c", names(x))
+  if(fwd) {
+    x[c("r","gamma")] <- log(x[c("r","gamma")])
+    x[cuts] <- qnorm(x[cuts])
+  }  else {
+    x[c("r","gamma")] <- exp(x[c("r","gamma")])
+    x["r"] <- max(x["r"], 1e-10)  # Make sure not 0
+    x["gamma"] <- max(x["gamma"], 1e-10)  # Make sure not 0
+    x[cuts] <- pnorm(x[cuts])
+  }
+	cuts <- x[grep("^c", names(x))]
+
+	weights <- c()
+	filled_proportion <- 0
+	for (cut_pt in cuts) {
+		nxt_weight <- cut_pt * (1-filled_proportion)
+		weights <- c(weights, nxt_weight)
+		filled_proportion <- filled_proportion + nxt_weight
+	}
+	weights <- c(weights, 1 - sum(weights))
+  names(weights) <- paste0("w", seq_along(weights))
+  c(x, weights)
 }
