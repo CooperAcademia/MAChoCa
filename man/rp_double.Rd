@@ -38,3 +38,8 @@ Used for both calculating likelihoods or sampling from a parameter estimate
 This function calculates the probabilities of responses to a dataset
 based on the provided parameters (in the \code{x} vector).
 }
+\details{
+The \code{x} parameter vector is expected to be a named vector containing values
+for \code{w} weight on the price attribute, \code{r} form of the distance metric and
+\code{gamma} sensitivity to differences in attribute space.
+}

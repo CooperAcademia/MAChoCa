@@ -2,17 +2,20 @@
 % Please edit documentation in R/likelihood.r
 \name{ll_double}
 \alias{ll_double}
-\title{Calculate likelihood of x given double option data (2 attrs)}
+\title{Calculate likelihood of x given double option data (N attrs)}
 \usage{
-ll_double(x, data, ...)
+ll_double(x, data, rp_func = rp_double, ...)
 }
 \arguments{
 \item{x}{A named vector of parameters. Expects certain values as in
-description}
+the description for the \code{rp_func}}
 
 \item{data}{A data.frame compatible object with specific rows as described.}
 
-\item{...}{Other parameters passed to \code{rp_single}}
+\item{rp_func}{A function for calculating response probabilities for choosing
+the left presented item.}
+
+\item{...}{Other parameters passed to \code{rp_func}}
 }
 \value{
 A single value (log-likelihood)
@@ -25,15 +28,8 @@ exemplar as from the single option models to calculate the likelihood
 of the parameter vector x given the data.
 }
 \details{
-The \code{x} parameter vector is expected to be a named vector containing values
-for \code{w} weight on the price attribute, \code{r} form of the distance metric and
-\code{gamma} sensitivity to differences in attribute space.
-
 The data object is assumed to be a data.frame compatible object with at
-least five columns, a \code{left_price} and a \code{right_price} column with values
-for the price attribute normalised to 0-1 and reversed so that 0 is the
-"worst" ie highest price and 1 is the best price.
-It should also have a \code{left_memory} and a \code{right_memory} column with memory
-values normalised to 0-1 (worst-best) and finally a \code{response} column with
-T/F for whether the option selected was on the left.
+least columns for each attribute used in the \code{rp_func} and additionally
+have a \code{response} column with T/F for whether the option selected was on the
+left.
 }
