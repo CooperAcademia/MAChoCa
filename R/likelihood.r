@@ -350,7 +350,6 @@ transform_pars_dir <- function(x, fwd=TRUE) {
     return(x)
   }
   x <- exp(x)
-  x["r"] <- max(x["r"], 1e-10)  # Make sure not 0
-  x["gamma"] <- max(x["gamma"], 1e-10)  # Make sure not 0
+  x <- pmax(x, 1e-10)  # Make sure not 0
   x
 }
