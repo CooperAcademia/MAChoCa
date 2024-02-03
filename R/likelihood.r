@@ -351,5 +351,9 @@ transform_pars_dir <- function(x, fwd=TRUE) {
   }
   x <- exp(x)
   x <- pmax(x, 1e-10)  # Make sure not 0
+  # Enforce alphas to be greater than 0.01 and less than 100
+	alpha_indices <- grep("^alpha", names(x))
+  x[alpha_indices] <- pmin(x[alpha_indices], 100)
+  x[alpha_indices] <- pmax(x[alpha_indices], 0.01)
   x
 }
