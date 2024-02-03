@@ -2,12 +2,20 @@
 % Please edit documentation in R/metric.r
 \name{distance}
 \alias{distance}
-\title{Calculate distance in psychological space}
+\alias{distance.numeric}
+\alias{distance.matrix}
+\title{Calculate distances in psychological space}
 \usage{
-distance(w, attrs, anchor, r)
+distance(w, ...)
+
+\method{distance}{numeric}(w, attrs, anchor, r)
+
+\method{distance}{matrix}(w, attrs, anchor, r)
 }
 \arguments{
-\item{w}{A vector of attribute weights.}
+\item{w}{A vector or matrix of attribute weights.}
+
+\item{...}{Unused, for extensibility}
 
 \item{attrs}{A matrix with ncol(attrs) = length(weights)}
 
@@ -19,7 +27,7 @@ distance(w, attrs, anchor, r)
 A vector of distances for each row of attrs
 }
 \description{
-Take a vector of weights and an anchor point, and a set of attribute values
-and return the distance between each point represented by the attribute
-values and the anchor, adjusted by the metric form \code{r}.
+Take a collection of weights and an anchor point, and a set of attribute
+values and return the distance between each point represented by the
+attribute values and the anchor, adjusted by the metric form \code{r}.
 }
