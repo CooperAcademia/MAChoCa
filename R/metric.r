@@ -39,8 +39,15 @@ distance.numeric <- function(w, attrs, anchor, r) {
 distance.matrix <- function(w, attrs, anchor, r) {
 	stopifnot(ncol(w) == ncol(attrs),
 						ncol(w) == length(anchor),
-						r > 0,
-						isTRUE(all.equal(sum(w), nrow(w))))
+						r > 0)
+  summed_weights <- apply(w, 1, sum)
+
+  if (!isTRUE(all.equal(summed_weights, rep(1, nrow(w))))) {
+    # Check rows where sum is not close enough to 1. Borrowed from approxeq {cgwtools}
+    too_far <- abs(summed_weights - 1) >= .Machine$double.eps ^ 0.5
+    stop(paste("ERROR: found weights where sum is not close enough to 1\n",
+              w[too_far], "\n"))
+  }
 
 	attr_dist <- sapply(seq_len(ncol(w)), FUN = function(i) {
 												w[,i] * abs(attrs[,i] - anchor[i])^r
