@@ -142,7 +142,6 @@ rp_double <- function(x, data,
   resp_p
 }
 
-
 #' Calculate response probabilities for 2xN using the cut_remain method
 #'
 #' Used for both calculating likelihoods or sampling from a parameter estimate
@@ -169,13 +168,61 @@ rp_double <- function(x, data,
 rp_cut <- function(x, data, loc1_attrs = c("left_price", "left_memory"),
                       loc2_attrs = c("right_price", "right_memory")) {
   x <- transform_pars_cut(x, fwd=FALSE)
+  stopifnot(length(loc1_attrs) == length(loc2_attrs))
+  n_attr <- length(loc1_attrs)
   da <- distance(x[grep("^w", names(x))],
                  data.matrix(data[loc1_attrs]),
-                 rep(0, 5),
+                 rep(0, n_attr),
                  x["r"])
   db <- distance(x[grep("^w", names(x))],
                  data.matrix(data[loc2_attrs]),
-                 rep(0, 5),
+                 rep(0, n_attr),
+                 x["r"])
+  resp_p <- da^x["gamma"] / (da^x["gamma"] + db^x["gamma"])
+#  resp_p <- pnorm(x["delta"] + x["s"] * d)
+  # Make sure not too close to 1
+  resp_p <- pmin(resp_p, 1 - 1e-10)
+  # Make sure not too close to 0
+  resp_p <- pmax(resp_p, 1e-10)
+  resp_p
+}
+
+#' Calculate response probabilities for 2xN using the dirichlet method
+#'
+#' Used for both calculating likelihoods or sampling from a parameter estimate
+#' This function calculates the probabilities of responses to a dataset
+#' based on the provided parameters (in the `x` vector).
+#'
+#' The `x` parameter vector is expected to be a named vector containing values
+#' for `\eqn{alpha_1..alpha_{N-1}}` where each \eqn{alpha_i} corresponds to the
+#' shape parameter for a dirichlet distribution for each attribute
+#' \eqn{1..(N-1)}. The dirichlet shape parameters are used to draw weights
+#' for each trial from the data.
+#' The parameter vector `x` also contains `r` form of the distance metric and
+#' `gamma` sensitivity to differences in attribute space.
+#'
+#' @param x A named vector of parameters. Expects certain values as in
+#'   description
+#' @param data A data.frame compatible object with specific rows as described.
+#' @param loc1_attrs The column names containing normalised values for the
+#'   attributes (which has the weight value applied to it) in location 1
+#' @param loc2_attrs The name of the column containing normalised values for the
+#'   attributes (which has the weight value applied to it) in location 2
+#' @importFrom stats pnorm
+#' @export
+rp_dir <- function(x, data, loc1_attrs = c("left_price", "left_memory"),
+                      loc2_attrs = c("right_price", "right_memory")) {
+  x <- transform_pars_dir(x, fwd=FALSE)
+  w <- rdirichlet(nrow(data), x[grep("^alpha", names(x))])
+  stopifnot(length(loc1_attrs) == length(loc2_attrs))
+  n_attr <- length(loc1_attrs)
+  da <- distance(w,
+                 data.matrix(data[loc1_attrs]),
+                 rep(0, n_attr),
+                 x["r"])
+  db <- distance(w,
+                 data.matrix(data[loc2_attrs]),
+                 rep(0, n_attr),
                  x["r"])
   resp_p <- da^x["gamma"] / (da^x["gamma"] + db^x["gamma"])
 #  resp_p <- pnorm(x["delta"] + x["s"] * d)
@@ -282,4 +329,28 @@ transform_pars_cut <- function(x, fwd=TRUE) {
 	weights <- c(weights, 1 - sum(weights))
   names(weights) <- paste0("w", seq_along(weights))
   c(x, weights)
+}
+
+#' Transform the parameter vector (2 x N) dirichlet method for use in pmwg
+#'
+#' See also the description for rp_dir This is a helper function that
+#' transforms the parameters. To transform for pmwg all parameter values
+#' are exponentiated in order to move to positive only.
+#'
+#' These operation are reversed when `fwd=TRUE`
+#'
+#' @param x The named vector of parameter estimates
+#' @param fwd Move certain parameter to real number line or back
+#'
+#' @return transformed parameter vector x
+#' @export
+transform_pars_dir <- function(x, fwd=TRUE) {
+  if(fwd) {
+    x <- log(x)
+    return(x)
+  }
+  x <- exp(x)
+  x["r"] <- max(x["r"], 1e-10)  # Make sure not 0
+  x["gamma"] <- max(x["gamma"], 1e-10)  # Make sure not 0
+  x
 }
