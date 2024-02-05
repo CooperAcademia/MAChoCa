@@ -58,7 +58,13 @@ ll_single <- function(x, data, ...) {
 #' @return A single value (log-likelihood)
 #' @export
 ll_double <- function(x, data, rp_func = rp_double, ...) {
-  resp_p <- rp_func(x, data, ...)
+  resp_p <- tryCatch(rp_func(x, data, ...),
+           error = function(e) {
+             if (e$message == "UNLIKELY") {
+               return(-Inf)
+             }
+             stop(e)
+           })
 
   ll <- sum(log(resp_p[data$response]), log((1 - resp_p)[!data$response]))
   if (is.nan(ll)) {
@@ -353,7 +359,9 @@ transform_pars_dir <- function(x, fwd=TRUE) {
   x <- pmax(x, 1e-10)  # Make sure not 0
   # Enforce alphas to be greater than 0.01 and less than 100
 	alpha_indices <- grep("^alpha", names(x))
-  x[alpha_indices] <- pmin(x[alpha_indices], 100)
-  x[alpha_indices] <- pmax(x[alpha_indices], 0.01)
+  if (any(x[alpha_indices] > 100) | any(x[alpha_indices] < 0.01)) {
+    print(x[alpha_indices])
+    stop("UNLIKELY")
+  }
   x
 }
