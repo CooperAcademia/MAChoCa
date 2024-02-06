@@ -65,10 +65,12 @@ ll_double <- function(x, data, rp_func = rp_double, ...) {
              }
              stop(e)
            })
-
+  if (any(is.infinite(resp_p))) {
+    return(-1e10)
+  }
   ll <- sum(log(resp_p[data$response]), log((1 - resp_p)[!data$response]))
   if (is.nan(ll)) {
-    return(-Inf)
+    return(-1e10)
   }
   ll
 }
@@ -360,7 +362,6 @@ transform_pars_dir <- function(x, fwd=TRUE) {
   # Enforce alphas to be greater than 0.01 and less than 100
 	alpha_indices <- grep("^alpha", names(x))
   if (any(x[alpha_indices] > 100) | any(x[alpha_indices] < 0.01)) {
-    print(x[alpha_indices])
     stop("UNLIKELY")
   }
   x
