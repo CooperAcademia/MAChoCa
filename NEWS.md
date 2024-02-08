@@ -1,4 +1,4 @@
-# machoca (development version)
+# machoca 0.3.1
 
 # machoca 0.3.0
 
