@@ -128,7 +128,7 @@ rp_single <- function(x, data, attr1 = "price_n", attr2 = "rating_n") {
 #' @importFrom stats pnorm
 #' @export
 rp_single_dir <- function(x, data, attrs = c("price_n", "rating_n")) {
-  x <- transform_pars(x, fwd=FALSE)
+  x <- transform_pars_dir(x, fwd=FALSE)
   w <- rdirichlet(nrow(data), x[grep("^alpha", names(x))])
   n_attr <- length(attrs)
   d <- distance(w,
