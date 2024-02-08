@@ -21,12 +21,23 @@
 #' @param x A named vector of parameters. Expects certain values as in
 #'   description
 #' @param data A data.frame compatible object with specific rows as described.
-#' @param ... Other parameters passed to `rp_single`
+#' @param rp_func A function for calculating response probabilities for choosing
+#'   the left presented item.
+#' @param ... Other parameters passed to `rp_func`
 #'
 #' @return A single value (log-likelihood)
 #' @export
-ll_single <- function(x, data, ...) {
-  resp_p <- rp_single(x, data, ...)
+ll_single <- function(x, data, rp_func = rp_single, ...) {
+  resp_p <- tryCatch(rp_func(x, data, ...),
+           error = function(e) {
+             if (e$message == "UNLIKELY") {
+               return(-Inf)
+             }
+             stop(e)
+           })
+  if (any(is.infinite(resp_p))) {
+    return(-1e10)
+  }
 
   ll <- sum(log(resp_p[data$accept]), log((1 - resp_p)[!data$accept]))
   if (is.nan(ll)) {
@@ -95,6 +106,34 @@ rp_single <- function(x, data, attr1 = "price_n", attr2 = "rating_n") {
   d <- distance(c(x["w"], 1 - x["w"]),
                 cbind(data[attr1], data[attr2]),
                 c(0, 0),
+                x["r"])
+  resp_p <- pnorm(x["delta"] + x["s"] * d)
+  # Make sure not too close to 1
+  resp_p <- pmin(resp_p, 1 - 1e-10)
+  # Make sure not too close to 0
+  resp_p <- pmax(resp_p, 1e-10)
+  resp_p
+}
+
+#' Calculate response probabilities using Dirichlet for single option
+#'
+#' Used for both calculating likelihoods or sampling from a parameter estimate
+#' This function calculates the probabilities of responses to a dataset
+#' based on the provided parameters (in the `x` vector).
+#' @param x A named vector of parameters. Expects certain values as in
+#'   description
+#' @param data A data.frame compatible object with specific rows as described.
+#' @param attrs The column names containing normalised values for the
+#'   attributes (which has the weight value applied to it) in location 1
+#' @importFrom stats pnorm
+#' @export
+rp_single_dir <- function(x, data, attrs = c("price_n", "rating_n")) {
+  x <- transform_pars(x, fwd=FALSE)
+  w <- rdirichlet(nrow(data), x[grep("^alpha", names(x))])
+  n_attr <- length(attrs)
+  d <- distance(w,
+                data.matrix(data[attrs]),
+                rep(0, n_attr),
                 x["r"])
   resp_p <- pnorm(x["delta"] + x["s"] * d)
   # Make sure not too close to 1

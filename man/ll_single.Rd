@@ -4,7 +4,7 @@
 \alias{ll_single}
 \title{Calculate likelihood of x given single option data}
 \usage{
-ll_single(x, data, ...)
+ll_single(x, data, rp_func = rp_single, ...)
 }
 \arguments{
 \item{x}{A named vector of parameters. Expects certain values as in
@@ -12,7 +12,10 @@ description}
 
 \item{data}{A data.frame compatible object with specific rows as described.}
 
-\item{...}{Other parameters passed to \code{rp_single}}
+\item{rp_func}{A function for calculating response probabilities for choosing
+the left presented item.}
+
+\item{...}{Other parameters passed to \code{rp_func}}
 }
 \value{
 A single value (log-likelihood)
