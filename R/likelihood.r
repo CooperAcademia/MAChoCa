@@ -398,9 +398,9 @@ transform_pars_dir <- function(x, fwd=TRUE) {
   }
   x <- exp(x)
   x <- pmax(x, 1e-10)  # Make sure not 0
-  # Enforce alphas to be greater than 0.01 and less than 100
+  # Enforce alphas to be greater than 0.01 and less than 5000
 	alpha_indices <- grep("^alpha", names(x))
-  if (any(x[alpha_indices] > 100) | any(x[alpha_indices] < 0.01)) {
+  if (any(x[alpha_indices] > 5e3) | any(x[alpha_indices] < 0.01)) {
     stop("UNLIKELY")
   }
   x
