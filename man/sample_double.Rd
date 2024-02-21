@@ -4,13 +4,15 @@
 \alias{sample_double}
 \title{Sample new responses from the parameter vector and double option data}
 \usage{
-sample_double(x, data)
+sample_double(x, data, rp_func = rp_double)
 }
 \arguments{
 \item{x}{A named vector of parameters. Expects certain values as in
 description}
 
 \item{data}{A data.frame compatible object with specific rows as described.}
+
+\item{rp_func}{The function to calculate response probabilities with.}
 }
 \description{
 Given a parameter vector \code{x} and a dtaset \code{data} generate response
