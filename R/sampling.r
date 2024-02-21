@@ -27,12 +27,12 @@ sample_single <- function(x, data) {
 #' @param x A named vector of parameters. Expects certain values as in
 #'   description
 #' @param data A data.frame compatible object with specific rows as described.
+#' @param rp_func The function to calculate response probabilities with.
 #' @importFrom stats rbinom
 #' @export
-sample_double <- function(x, data) {
-  resp_p <- rp_double(x, data)
+sample_double <- function(x, data, rp_func = rp_double) {
+  resp_p <- rp_func(x, data)
   data$resp_p <- resp_p
   data$response <- rbinom(n=nrow(data), size=1, prob=resp_p) |> as.logical()
   return(data)
 }
-
