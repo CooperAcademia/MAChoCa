@@ -8,10 +8,11 @@
 #' @param x A named vector of parameters. Expects certain values as in
 #'   description
 #' @param data A data.frame compatible object with specific rows as described.
+#' @param rp_func The function to calculate response probabilities with.
 #' @importFrom stats rbinom
 #' @export
-sample_single <- function(x, data) {
-  resp_p <- rp_single(x, data)
+sample_single <- function(x, data, rp_func = rp_single) {
+  resp_p <- rp_func(x, data)
   data$resp_p <- resp_p
   data$accept <- rbinom(n=nrow(data), size=1, prob=resp_p) |> as.logical()
   return(data)
