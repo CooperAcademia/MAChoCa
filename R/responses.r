@@ -55,6 +55,7 @@ rp_single_dir <- function(x, data, attrs = c("price_n", "rating_n")) {
   resp_p
 }
 
+
 #' Calculate response probabilities for double option double attribute data
 #'
 #' Used for both calculating likelihoods or sampling from a parameter estimate
@@ -94,47 +95,6 @@ rp_double <- function(x, data,
                  x["r"])
   resp_p <- da^x["gamma"] / (da^x["gamma"] + db^x["gamma"])
 #  resp_p <- pnorm(x["delta"] + x["s"] * d)
-  # Make sure not too close to 1
-  resp_p <- pmin(resp_p, 1 - 1e-10)
-  # Make sure not too close to 0
-  resp_p <- pmax(resp_p, 1e-10)
-  resp_p
-}
-
-#' Calculate response probabilities for heatmap dirichlet MDS
-#'
-#' Used for both calculating likelihoods or sampling from a parameter estimate
-#' This function calculates the probabilities of responses to a dataset
-#' based on the provided parameters (in the `x` vector).
-#'
-#' The `x` parameter vector is expected to be a named vector containing values
-#' for `w` weight on all attributes, `r` form of the distance metric and
-#' `gamma` sensitivity to differences in attribute space.
-#' All attribute values are expected to be already transformed.
-#'
-#' @param x A named vector of parameters. Expects certain values as in
-#'   description
-#' @param data A data.frame compatible object with specific rows as described.
-#' @param loc1_attrs The column names containing normalised values for the
-#'   attributes (which has the weight value applied to it) in location 1
-#' @param loc2_attrs The name of the column containing normalised values for the
-#'   attributes (which has the weight value applied to it) in location 2
-#' @importFrom stats pnorm
-#' @export
-rp_heatdir <- function(x, data, loc1_attrs = c("left_price", "left_memory"),
-                       loc2_attrs = c("right_price", "right_memory")) {
-  stopifnot(length(loc1_attrs) == length(loc2_attrs))
-  n_attr <- length(loc1_attrs)
-  w <- x[grep("^w", names(x))]
-  da <- distance(w,
-                 data.matrix(data[loc1_attrs]),
-                 rep(0, n_attr),
-                 x["r"])
-  db <- distance(w,
-                 data.matrix(data[loc2_attrs]),
-                 rep(0, n_attr),
-                 x["r"])
-  resp_p <- da^x["gamma"] / (da^x["gamma"] + db^x["gamma"])
   # Make sure not too close to 1
   resp_p <- pmin(resp_p, 1 - 1e-10)
   # Make sure not too close to 0
@@ -234,3 +194,43 @@ rp_dir <- function(x, data, loc1_attrs = c("left_price", "left_memory"),
 }
 
 
+#' Calculate response probabilities for heatmap dirichlet MDS
+#'
+#' Used for both calculating likelihoods or sampling from a parameter estimate
+#' This function calculates the probabilities of responses to a dataset
+#' based on the provided parameters (in the `x` vector).
+#'
+#' The `x` parameter vector is expected to be a named vector containing values
+#' for `w` weight on all attributes, `r` form of the distance metric and
+#' `gamma` sensitivity to differences in attribute space.
+#' All attribute values are expected to be already transformed.
+#'
+#' @param x A named vector of parameters. Expects certain values as in
+#'   description
+#' @param data A data.frame compatible object with specific rows as described.
+#' @param loc1_attrs The column names containing normalised values for the
+#'   attributes (which has the weight value applied to it) in location 1
+#' @param loc2_attrs The name of the column containing normalised values for the
+#'   attributes (which has the weight value applied to it) in location 2
+#' @importFrom stats pnorm
+#' @export
+rp_heatdir <- function(x, data, loc1_attrs = c("left_price", "left_memory"),
+                       loc2_attrs = c("right_price", "right_memory")) {
+  stopifnot(length(loc1_attrs) == length(loc2_attrs))
+  n_attr <- length(loc1_attrs)
+  w <- x[grep("^w", names(x))]
+  da <- distance(w,
+                 data.matrix(data[loc1_attrs]),
+                 rep(0, n_attr),
+                 x["r"])
+  db <- distance(w,
+                 data.matrix(data[loc2_attrs]),
+                 rep(0, n_attr),
+                 x["r"])
+  resp_p <- da^x["gamma"] / (da^x["gamma"] + db^x["gamma"])
+  # Make sure not too close to 1
+  resp_p <- pmin(resp_p, 1 - 1e-10)
+  # Make sure not too close to 0
+  resp_p <- pmax(resp_p, 1e-10)
+  resp_p
+}
