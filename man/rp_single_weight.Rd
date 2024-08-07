@@ -4,7 +4,7 @@
 \alias{rp_single_weight}
 \title{Calculate response probabilities for single option double attribute data}
 \usage{
-rp_single_weight(x, data, attr1 = "price_n", attr2 = "rating_n")
+rp_single_weight(x, data, attrs = c("price_n", "rating_n"))
 }
 \arguments{
 \item{x}{A named vector of parameters. Expects certain values as in
@@ -12,11 +12,8 @@ description}
 
 \item{data}{A data.frame compatible object with specific rows as described.}
 
-\item{attr1}{The name of the column containing normalised values for the
-first attribute (which has the weight value applied to it)}
-
-\item{attr2}{The name of the column containing normalised values for the
-second attribute(which has the (1 - weight) values applied to it}
+\item{attrs}{The column names containing normalised values for the
+attributes (which has the weight value applied to it) in location 1}
 }
 \description{
 Used for both calculating likelihoods or sampling from a parameter estimate

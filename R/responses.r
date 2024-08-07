@@ -35,19 +35,18 @@ rp_single <- function(x, data, attr1 = "price_n", attr2 = "rating_n") {
 #' @param x A named vector of parameters. Expects certain values as in
 #'   description
 #' @param data A data.frame compatible object with specific rows as described.
-#' @param attr1 The name of the column containing normalised values for the
-#'   first attribute (which has the weight value applied to it)
-#' @param attr2 The name of the column containing normalised values for the
-#'   second attribute(which has the (1 - weight) values applied to it
+#' @param attrs The column names containing normalised values for the
+#'   attributes (which has the weight value applied to it) in location 1
 #' @importFrom stats pnorm
 #' @export
-rp_single_weight <- function(x, data, attr1 = "price_n", attr2 = "rating_n") {
+rp_single_weight <- function(x, data, attrs = c("price_n", "rating_n")) {
   x <- transform_pars_weights(x, fwd=FALSE)
   w <- c(1, x['w2'])
   w <- w/sum(w)
+  n_attr <- length(attrs)
   d <- distance(w,
-                cbind(data[attr1], data[attr2]),
-                c(0, 0),
+                data.matrix(data[attrs]),
+                rep(0, n_attr),
                 x["r"])
   resp_p <- pnorm(x["delta"] + x["s"] * d)
   # Make sure not too close to 1
