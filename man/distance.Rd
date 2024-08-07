@@ -6,7 +6,7 @@
 \alias{distance.matrix}
 \title{Calculate distances in psychological space}
 \usage{
-distance(w, ...)
+distance(w, attrs, anchor, r, ...)
 
 \method{distance}{numeric}(w, attrs, anchor, r)
 
@@ -15,13 +15,13 @@ distance(w, ...)
 \arguments{
 \item{w}{A vector or matrix of attribute weights.}
 
-\item{...}{Unused, for extensibility}
-
 \item{attrs}{A matrix with ncol(attrs) = length(weights)}
 
 \item{anchor}{An "exemplar" or anchor point to which attrs will be compared}
 
 \item{r}{A positive value between that changes the metric form}
+
+\item{...}{Unused, for extensibility}
 }
 \value{
 A vector of distances for each row of attrs

@@ -5,14 +5,14 @@
 #' attribute values and the anchor, adjusted by the metric form `r`.
 #'
 #' @param w A vector or matrix of attribute weights.
-#' @param ... Unused, for extensibility
 #' @param attrs A matrix with ncol(attrs) = length(weights)
 #' @param anchor An "exemplar" or anchor point to which attrs will be compared
 #' @param r A positive value between that changes the metric form
+#' @param ... Unused, for extensibility
 #'
 #' @return A vector of distances for each row of attrs
 #' @export
-distance <- function (w, ...) {
+distance <- function (w, attrs, anchor, r, ...) {
 	UseMethod("distance", w)
 }
 

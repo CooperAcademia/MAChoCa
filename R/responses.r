@@ -27,6 +27,36 @@ rp_single <- function(x, data, attr1 = "price_n", attr2 = "rating_n") {
   resp_p
 }
 
+#' Calculate response probabilities for single option double attribute data
+#'
+#' Used for both calculating likelihoods or sampling from a parameter estimate
+#' This function calculates the probabilities of responses to a dataset
+#' based on the provided parameters (in the `x` vector).
+#' @param x A named vector of parameters. Expects certain values as in
+#'   description
+#' @param data A data.frame compatible object with specific rows as described.
+#' @param attr1 The name of the column containing normalised values for the
+#'   first attribute (which has the weight value applied to it)
+#' @param attr2 The name of the column containing normalised values for the
+#'   second attribute(which has the (1 - weight) values applied to it
+#' @importFrom stats pnorm
+#' @export
+rp_single_weight <- function(x, data, attr1 = "price_n", attr2 = "rating_n") {
+  x <- transform_pars_weights(x, fwd=FALSE)
+  w <- c(1, x['w2'])
+  w <- w/sum(w)
+  d <- distance(w,
+                cbind(data[attr1], data[attr2]),
+                c(0, 0),
+                x["r"])
+  resp_p <- pnorm(x["delta"] + x["s"] * d)
+  # Make sure not too close to 1
+  resp_p <- pmin(resp_p, 1 - 1e-10)
+  # Make sure not too close to 0
+  resp_p <- pmax(resp_p, 1e-10)
+  resp_p
+}
+
 #' Calculate response probabilities using Dirichlet for single option
 #'
 #' Used for both calculating likelihoods or sampling from a parameter estimate
@@ -186,6 +216,52 @@ rp_dir <- function(x, data, loc1_attrs = c("left_price", "left_memory"),
                  x["r"])
   resp_p <- da^x["gamma"] / (da^x["gamma"] + db^x["gamma"])
 #  resp_p <- pnorm(x["delta"] + x["s"] * d)
+  # Make sure not too close to 1
+  resp_p <- pmin(resp_p, 1 - 1e-10)
+  # Make sure not too close to 0
+  resp_p <- pmax(resp_p, 1e-10)
+  resp_p
+}
+
+#' Calculate response probabilities for 2xN using the normalised weights method
+#'
+#' Used for both calculating likelihoods or sampling from a parameter estimate
+#' This function calculates the probabilities of responses to a dataset
+#' based on the provided parameters (in the `x` vector).
+#'
+#' The `x` parameter vector is expected to be a named vector containing values
+#' for `\eqn{w_2..w_{N}}` where each \eqn{w_i} corresponds to the
+#' unnormalised weight for an attribute, with the first weight (typically price)
+#' fixed at 1.
+#' The parameter vector `x` also contains `r` form of the distance metric and
+#' `gamma` sensitivity to differences in attribute space.
+#'
+#' @param x A named vector of parameters. Expects certain values as in
+#'   description
+#' @param data A data.frame compatible object with specific rows as described.
+#' @param loc1_attrs The column names containing normalised values for the
+#'   attributes (which has the weight value applied to it) in location 1
+#' @param loc2_attrs The name of the column containing normalised values for the
+#'   attributes (which has the weight value applied to it) in location 2
+#' @importFrom stats pnorm
+#' @export
+rp_weight <- function(x, data, loc1_attrs = c("left_price", "left_memory"),
+                      loc2_attrs = c("right_price", "right_memory")) {
+  x <- transform_pars_weights(x, fwd=FALSE)
+  weights <- grep("^w", names(x))
+  w <- c(1, x[weights])
+  w <- w/sum(w)
+  stopifnot(length(loc1_attrs) == length(loc2_attrs))
+  n_attr <- length(loc1_attrs)
+  da <- distance(w,
+                 data.matrix(data[loc1_attrs]),
+                 rep(0, n_attr),
+                 x["r"])
+  db <- distance(w,
+                 data.matrix(data[loc2_attrs]),
+                 rep(0, n_attr),
+                 x["r"])
+  resp_p <- da^x["gamma"] / (da^x["gamma"] + db^x["gamma"])
   # Make sure not too close to 1
   resp_p <- pmin(resp_p, 1 - 1e-10)
   # Make sure not too close to 0

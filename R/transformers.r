@@ -123,3 +123,28 @@ transform_pars_dir <- function(x, fwd=TRUE) {
   }
   x
 }
+
+#' Transform the parameter vector for use in pmwg
+#'
+#' See also the description for ll_single. This is a helper function that
+#' transforms the parameters. To transform for pmwg the `r` and `s` values
+#' and any weight values are exponentiated in order to move to positive only.
+#'
+#' These operation are reversed when `fwd=TRUE`
+#'
+#' @param x The named vector of parameter estimates
+#' @param fwd Move certain parameter to real number line or back
+#'
+#' @return transformed parameter vector x
+#' @export
+transform_pars_weights <- function(x, fwd=TRUE) {
+  weights <- grep("^w", names(x))
+  others <- na.omit(match(c("r", "s", "delta", "gamma"), names(x)))
+  if(fwd) {
+    x[c(weights, others)] <- log(x[c(weights, others)])
+  }  else {
+    x[c(weights, others)] <- exp(x[c(weights, others)])
+    x["r"] <- max(x["r"], 1e-10)  # Make sure not 0
+  }
+  x
+}
