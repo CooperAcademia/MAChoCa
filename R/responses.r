@@ -41,6 +41,7 @@ rp_single <- function(x, data, attr1 = "price_n", attr2 = "rating_n") {
 #' @export
 rp_single_weight <- function(x, data, attrs = c("price_n", "rating_n")) {
   x <- transform_pars_weights(x, fwd=FALSE)
+  x["w2"] <- pmax(pmin(x["w2"], 1e3), 1e-3)
   w <- c(1, x['w2'])
   w <- w/sum(w)
   n_attr <- length(attrs)
@@ -248,6 +249,7 @@ rp_weight <- function(x, data, loc1_attrs = c("left_price", "left_memory"),
                       loc2_attrs = c("right_price", "right_memory")) {
   x <- transform_pars_weights(x, fwd=FALSE)
   weights <- grep("^w", names(x))
+  x[weights] <- pmax(pmin(x[weights], 1e3), 1e-3)
   w <- c(1, x[weights])
   w <- w/sum(w)
   stopifnot(length(loc1_attrs) == length(loc2_attrs))
