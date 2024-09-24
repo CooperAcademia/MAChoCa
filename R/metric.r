@@ -19,7 +19,7 @@ distance <- function(w, attrs, anchor, r, ...) {
 
 #' @export
 #' @rdname distance
-distance.numeric <- function(w, attrs, anchor, r) {
+distance.numeric <- function(w, attrs, anchor, r, ...) {
   stopifnot(
     length(w) == ncol(attrs),
     length(w) == length(anchor),
@@ -38,7 +38,7 @@ distance.numeric <- function(w, attrs, anchor, r) {
 
 #' @export
 #' @rdname distance
-distance.matrix <- function(w, attrs, anchor, r) {
+distance.matrix <- function(w, attrs, anchor, r, ...) {
   stopifnot(
     ncol(w) == ncol(attrs),
     ncol(w) == length(anchor),

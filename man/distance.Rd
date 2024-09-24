@@ -8,9 +8,9 @@
 \usage{
 distance(w, attrs, anchor, r, ...)
 
-\method{distance}{numeric}(w, attrs, anchor, r)
+\method{distance}{numeric}(w, attrs, anchor, r, ...)
 
-\method{distance}{matrix}(w, attrs, anchor, r)
+\method{distance}{matrix}(w, attrs, anchor, r, ...)
 }
 \arguments{
 \item{w}{A vector or matrix of attribute weights.}

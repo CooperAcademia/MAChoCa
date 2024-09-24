@@ -57,6 +57,38 @@ rp_single_weight <- function(x, data, attrs = c("price_n", "rating_n")) {
   resp_p
 }
 
+#' Calculate response probabilities for single option double attribute data
+#'
+#' Used for both calculating likelihoods or sampling from a parameter estimate
+#' This function calculates the probabilities of responses to a dataset
+#' based on the provided parameters (in the `x` vector).
+#' This version drops the delta parameter.
+#'
+#' @param x A named vector of parameters. Expects certain values as in
+#'   description
+#' @param data A data.frame compatible object with specific rows as described.
+#' @param attrs The column names containing normalised values for the
+#'   attributes (which has the weight value applied to it) in location 1
+#' @importFrom stats pnorm
+#' @export
+rp_single_weight_nodelta <- function(x, data, attrs = c("price_n", "rating_n")) {
+  x <- transform_pars_weights(x, fwd=FALSE)
+  x["w2"] <- pmax(pmin(x["w2"], 1e3), 1e-3)
+  w <- c(1, x['w2'])
+  w <- w/sum(w)
+  n_attr <- length(attrs)
+  d <- distance(w,
+                data.matrix(data[attrs]),
+                rep(0, n_attr),
+                x["r"])
+  resp_p <- pnorm(x["s"] * d)
+  # Make sure not too close to 1
+  resp_p <- pmin(resp_p, 1 - 1e-10)
+  # Make sure not too close to 0
+  resp_p <- pmax(resp_p, 1e-10)
+  resp_p
+}
+
 #' Calculate response probabilities using Dirichlet for single option
 #'
 #' Used for both calculating likelihoods or sampling from a parameter estimate
