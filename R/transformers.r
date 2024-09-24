@@ -137,7 +137,7 @@ transform_pars_dir <- function(x, fwd=TRUE) {
 #'
 #' @return transformed parameter vector x
 #' @export
-transform_pars_weights <- function(x, fwd=TRUE) {
+transform_pars_weights <- function(x, fwd = TRUE) {
   weights <- grep("^w", names(x))
   others <- na.omit(match(c("r", "s", "delta", "gamma"), names(x)))
   if(fwd) {

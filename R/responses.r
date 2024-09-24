@@ -124,7 +124,6 @@ rp_double <- function(x, data,
                  c(0, 0),
                  x["r"])
   resp_p <- da^x["gamma"] / (da^x["gamma"] + db^x["gamma"])
-#  resp_p <- pnorm(x["delta"] + x["s"] * d)
   # Make sure not too close to 1
   resp_p <- pmin(resp_p, 1 - 1e-10)
   # Make sure not too close to 0
@@ -169,7 +168,6 @@ rp_cut <- function(x, data, loc1_attrs = c("left_price", "left_memory"),
                  rep(0, n_attr),
                  x["r"])
   resp_p <- da^x["gamma"] / (da^x["gamma"] + db^x["gamma"])
-#  resp_p <- pnorm(x["delta"] + x["s"] * d)
   # Make sure not too close to 1
   resp_p <- pmin(resp_p, 1 - 1e-10)
   # Make sure not too close to 0
@@ -215,7 +213,6 @@ rp_dir <- function(x, data, loc1_attrs = c("left_price", "left_memory"),
                  rep(0, n_attr),
                  x["r"])
   resp_p <- da^x["gamma"] / (da^x["gamma"] + db^x["gamma"])
-#  resp_p <- pnorm(x["delta"] + x["s"] * d)
   # Make sure not too close to 1
   resp_p <- pmin(resp_p, 1 - 1e-10)
   # Make sure not too close to 0
