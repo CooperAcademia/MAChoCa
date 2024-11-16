@@ -110,15 +110,17 @@ transform_pars_cut <- function(x, fwd=TRUE) {
 #' @return transformed parameter vector x
 #' @export
 transform_pars_dir <- function(x, fwd=TRUE) {
-  if(fwd) {
-    x <- log(x)
+  alpha_indices <- grep("^alpha", names(x))
+  others <- na.omit(match(c("r", "s", "gamma"), names(x)))
+  if (fwd) {
+    x[c(alpha_indices, others)] <- log(x[c(alpha_indices, others)])
     return(x)
   }
-  x <- exp(x)
-  x <- pmax(x, 1e-10)  # Make sure not 0
+  x[c(alpha_indices, others)] <- exp(x[c(alpha_indices, others)])
+  x["r"] <- max(x["r"], 1e-10)  # Make sure not 0
   # Enforce alphas to be greater than 0.01 and less than 5000
-	alpha_indices <- grep("^alpha", names(x))
-  if (any(x[alpha_indices] > 5e3) | any(x[alpha_indices] < 0.01)) {
+  alpha_indices <- grep("^alpha", names(x))
+  if (any(x[alpha_indices] > 5e3) || any(x[alpha_indices] < 0.01)) {
     stop("UNLIKELY")
   }
   x
@@ -139,8 +141,8 @@ transform_pars_dir <- function(x, fwd=TRUE) {
 #' @export
 transform_pars_weights <- function(x, fwd = TRUE) {
   weights <- grep("^w", names(x))
-  others <- na.omit(match(c("r", "s", "delta", "gamma"), names(x)))
-  if(fwd) {
+  others <- na.omit(match(c("r", "s", "gamma"), names(x)))
+  if (fwd) {
     x[c(weights, others)] <- log(x[c(weights, others)])
   }  else {
     x[c(weights, others)] <- exp(x[c(weights, others)])
